@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Простой чат 👻</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>👻 Простой чат (Мобильный)</title>
     <style>
         :root {
             --bg: #1e1f22;
@@ -15,88 +15,250 @@
             --muted: #949ba4;
             --red: #f23f43;
             --green: #23a559;
-            --radius: 8px;
+            --radius: 12px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; background: var(--bg); font-family: 'Segoe UI', sans-serif; color: var(--text); display: flex; justify-content: center; align-items: center; }
-        #app { width: 100%; max-width: 900px; height: 90vh; background: var(--panel); border-radius: 12px; display: flex; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        /* Левая панель – друзья */
-        #sidebar { width: 240px; background: var(--bg); display: flex; flex-direction: column; border-right: 1px solid #3f4147; }
-        #sidebar-header { padding: 16px; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #3f4147; display: flex; justify-content: space-between; align-items: center; }
-        #myIdDisplay { font-size: 0.75rem; color: var(--muted); cursor: pointer; }
-        #friends-list { flex: 1; overflow-y: auto; padding: 8px; }
-        .friend-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--radius); cursor: pointer; transition: background 0.15s; margin-bottom: 2px; }
-        .friend-item:hover { background: var(--msg); }
+        html, body { height: 100%; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; color: var(--text); overflow: hidden; }
+        #app { display: flex; height: 100%; width: 100%; max-width: 100vw; }
+
+        /* Панель друзей (по умолчанию на мобилке на весь экран, на десктопе 300px слева) */
+        #friends-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            min-width: 0;
+        }
+        @media (min-width: 768px) {
+            #friends-panel {
+                flex: 0 0 300px;
+                border-right: 1px solid #3f4147;
+            }
+            #chat-panel {
+                flex: 1;
+            }
+        }
+
+        #panel-header {
+            padding: 20px 16px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3f4147;
+            flex-shrink: 0;
+        }
+        #panel-header h2 { font-size: 1.4rem; }
+        #myIdBtn {
+            background: var(--panel);
+            border: none;
+            color: var(--muted);
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        #myIdBtn:active { background: var(--msg); }
+
+        #friends-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .friend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-bottom: 4px;
+        }
+        .friend-item:active, .friend-item:hover { background: var(--msg); }
         .friend-item.active { background: var(--brand); }
-        .friend-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--brand); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; }
-        .friend-name { font-size: 0.95rem; }
-        .friend-status { font-size: 0.7rem; color: var(--muted); }
-        .online-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin-left: auto; }
-        .add-friend { margin: 8px; display: flex; gap: 8px; }
-        .add-friend input { flex: 1; background: var(--panel); border: 1px solid #3f4147; border-radius: var(--radius); padding: 8px 12px; color: var(--text); font-size: 0.9rem; outline: none; }
+        .friend-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--brand);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .friend-info { flex: 1; min-width: 0; }
+        .friend-name { font-size: 1.05rem; }
+        .friend-status { font-size: 0.8rem; color: var(--muted); }
+        .online-dot {
+            width: 10px; height: 10px; background: var(--green); border-radius: 50%;
+            margin-left: auto; flex-shrink: 0;
+        }
+
+        .add-friend {
+            padding: 12px 16px;
+            border-top: 1px solid #3f4147;
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .add-friend input {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid #3f4147;
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            -webkit-appearance: none;
+        }
         .add-friend input:focus { border-color: var(--brand); }
-        .add-friend button { background: var(--brand); border: none; color: white; border-radius: var(--radius); padding: 8px 12px; cursor: pointer; font-weight: 600; transition: background 0.15s; }
-        .add-friend button:hover { background: var(--brandh); }
-        /* Правая часть – чат */
-        #chat-panel { flex: 1; display: flex; flex-direction: column; }
-        #chat-header { padding: 16px; border-bottom: 1px solid #3f4147; display: flex; align-items: center; gap: 8px; }
-        #chat-header .friend-avatar { width: 36px; height: 36px; }
-        #chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { max-width: 70%; padding: 8px 14px; border-radius: 12px; background: var(--msg); align-self: flex-start; word-break: break-word; line-height: 1.4; }
-        .msg.mine { align-self: flex-end; background: var(--brand); }
-        .msg .meta { font-size: 0.7rem; color: var(--muted); margin-bottom: 2px; }
-        .msg-input { padding: 12px; border-top: 1px solid #3f4147; display: flex; gap: 8px; }
-        .msg-input input { flex: 1; background: var(--bg); border: 1px solid #3f4147; border-radius: var(--radius); padding: 10px 14px; color: var(--text); font-size: 0.95rem; outline: none; }
-        .msg-input input:focus { border-color: var(--brand); }
-        .msg-input button { background: var(--brand); border: none; color: white; border-radius: var(--radius); padding: 10px 16px; cursor: pointer; font-weight: 600; transition: background 0.15s; }
-        .msg-input button:hover { background: var(--brandh); }
-        .empty-chat { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem; }
-        .disconnect-btn { margin-left: auto; background: transparent; border: 1px solid var(--red); color: var(--red); border-radius: var(--radius); padding: 6px 12px; cursor: pointer; font-size: 0.8rem; }
-        .disconnect-btn:hover { background: var(--red); color: white; }
+        .add-friend button {
+            background: var(--brand); border: none; color: white;
+            border-radius: 20px; padding: 12px 18px; font-size: 1.2rem;
+            cursor: pointer; transition: background 0.15s;
+        }
+        .add-friend button:active { background: var(--brandh); }
+
+        /* Панель чата (скрыта на мобилке, пока не выбран друг) */
+        #chat-panel {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            min-width: 0;
+        }
+        #chat-panel.active { display: flex; }
+
+        #chat-header {
+            padding: 16px;
+            border-bottom: 1px solid #3f4147;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        #back-btn {
+            background: none; border: none; color: var(--muted);
+            font-size: 1.5rem; cursor: pointer; padding: 8px;
+        }
+        #chat-friend-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--brand);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold;
+        }
+        #chat-friend-name { font-size: 1.2rem; font-weight: 600; }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            background: var(--msg);
+            align-self: flex-start;
+            word-break: break-word;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        .msg.mine {
+            align-self: flex-end;
+            background: var(--brand);
+        }
+        .msg .time {
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .chat-input {
+            padding: 12px 16px;
+            border-top: 1px solid #3f4147;
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .chat-input input {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid #3f4147;
+            border-radius: 24px;
+            padding: 12px 18px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .chat-input input:focus { border-color: var(--brand); }
+        .chat-input button {
+            background: var(--brand); border: none; color: white;
+            border-radius: 24px; padding: 12px 18px; font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .chat-input button:active { background: var(--brandh); }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Утилиты */
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 <div id="app">
-    <!-- Сайдбар друзей -->
-    <div id="sidebar">
-        <div id="sidebar-header">
-            <span>👻 Друзья</span>
-            <span id="myIdDisplay" title="Твой ID (нажми, чтобы скопировать)">Я</span>
+    <!-- Панель друзей (главный экран на мобилке) -->
+    <div id="friends-panel">
+        <div id="panel-header">
+            <h2>👻 Друзья</h2>
+            <button id="myIdBtn">Мой ID</button>
         </div>
-        <div id="friends-list"></div>
+        <div id="friends-list">
+            <div class="empty-state">Нет друзей.<br>Скопируй свой ID и отправь другу.</div>
+        </div>
         <div class="add-friend">
-            <input type="text" id="newFriendId" placeholder="ID друга...">
-            <button onclick="addFriend()">➕</button>
+            <input type="text" id="newFriendIdInput" placeholder="Вставь ID друга...">
+            <button id="addFriendBtn">➕</button>
         </div>
     </div>
-    <!-- Чат -->
+
+    <!-- Чат (открывается при выборе друга) -->
     <div id="chat-panel">
-        <div id="chat-header" class="hidden">
-            <div class="friend-avatar" id="active-friend-avatar"></div>
-            <span id="active-friend-name"></span>
-            <button class="disconnect-btn" onclick="disconnectCurrent()">Отключиться</button>
+        <div id="chat-header">
+            <button id="back-btn">←</button>
+            <div id="chat-friend-avatar"></div>
+            <span id="chat-friend-name"></span>
         </div>
-        <div id="chat-messages"></div>
-        <div class="empty-chat" id="empty-placeholder">Выбери друга или добавь нового</div>
-        <div class="msg-input hidden" id="msg-input-area">
-            <input type="text" id="msgInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') sendMsg();">
-            <button onclick="sendMsg()">➤</button>
+        <div id="messages"></div>
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Сообщение..." autocomplete="off">
+            <button id="sendMsgBtn">➤</button>
         </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
 <script>
-// ── Глобальные переменные ──────────────────────
+// ── Глобальное состояние ──────────────────────
 let myPeer = null;
 let myId = null;
-let connections = {};          // friendId -> DataConnection
-let currentFriend = null;     // id текущего чата
-let friends = {};             // id -> { name, avatarColor, ... } (сохраняется)
+let connections = {};           // friendId -> DataConnection
+let friends = {};              // friendId -> { name, avatarColor }
+let currentFriend = null;
 
 // ── Инициализация Peer ────────────────────────
-function initPeer() {
+function init() {
+    // Генерируем случайный ID (6 символов)
     myId = Math.random().toString(36).substring(2, 8);
     myPeer = new Peer(myId, {
         host: '0.peerjs.com',
@@ -106,104 +268,134 @@ function initPeer() {
 
     myPeer.on('open', (id) => {
         myId = id;
-        document.getElementById('myIdDisplay').textContent = 'Мой ID: ' + id;
-        document.getElementById('myIdDisplay').onclick = () => {
-            navigator.clipboard.writeText(id);
-            alert('ID скопирован: ' + id);
+        document.getElementById('myIdBtn').textContent = 'Мой ID: ' + id;
+        document.getElementById('myIdBtn').onclick = () => {
+            navigator.clipboard.writeText(id).then(() => {
+                alert('ID скопирован! Отправь его другу.');
+            }).catch(() => {
+                prompt('Твой ID (скопируй вручную):', id);
+            });
         };
-        // Восстановить друзей из localStorage
         loadFriends();
         renderFriendList();
     });
 
-    // Входящее соединение от другого пользователя
     myPeer.on('connection', (conn) => {
         setupConnection(conn);
     });
 
     myPeer.on('error', (err) => {
         console.error('Peer error:', err);
+        alert('Ошибка соединения: ' + err);
     });
 }
 
-// ── Сохранение / загрузка друзей (localStorage) ──
-function saveFriends() {
-    localStorage.setItem('ghost_friends', JSON.stringify(friends));
-}
+// ── Работа с друзьями (localStorage) ───────────
 function loadFriends() {
     try {
         const saved = localStorage.getItem('ghost_friends');
         if (saved) friends = JSON.parse(saved);
     } catch(e) {}
 }
+function saveFriends() {
+    localStorage.setItem('ghost_friends', JSON.stringify(friends));
+}
+function randomColor() {
+    const colors = ['#5865f2','#57f287','#fee75c','#eb459e','#ed4245','#e67e22','#1abc9c','#3498db'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
 
 // ── Отрисовка списка друзей ────────────────────
 function renderFriendList() {
     const list = document.getElementById('friends-list');
     list.innerHTML = '';
-    if (Object.keys(friends).length === 0) {
-        list.innerHTML = '<div style="padding:16px;color:var(--muted);text-align:center">Пока нет друзей</div>';
+    const friendIds = Object.keys(friends);
+    if (friendIds.length === 0) {
+        list.innerHTML = '<div class="empty-state">Нет друзей.<br>Скопируй свой ID и отправь другу.</div>';
         return;
     }
-    for (const [fid, fdata] of Object.entries(friends)) {
+    friendIds.forEach(fid => {
+        const fdata = friends[fid];
         const item = document.createElement('div');
-        item.className = 'friend-item' + (currentFriend === fid ? ' active' : '');
+        item.className = 'friend-item';
+        if (currentFriend === fid) item.classList.add('active');
         item.innerHTML = `
             <div class="friend-avatar" style="background:${fdata.avatarColor || '#5865f2'}">${(fdata.name || fid).substring(0,2).toUpperCase()}</div>
-            <div style="flex:1;min-width:0">
+            <div class="friend-info">
                 <div class="friend-name">${fdata.name || fid}</div>
-                <div class="friend-status">${connections[fid] ? '🟢 Онлайн' : '⚫ Офлайн'}</div>
+                <div class="friend-status">${connections[fid] ? '🟢 Онлайн' : '⚫ Не в сети'}</div>
             </div>
-            ${connections[fid] ? '<span class="online-dot"></span>' : ''}
+            ${connections[fid] ? '<div class="online-dot"></div>' : ''}
         `;
         item.onclick = () => openChat(fid);
         list.appendChild(item);
-    }
+    });
 }
 
-// ── Добавление друга (подключение) ────────────
-function addFriend() {
-    const input = document.getElementById('newFriendId');
+// ── Добавление друга ──────────────────────────
+document.getElementById('addFriendBtn').addEventListener('click', () => {
+    const input = document.getElementById('newFriendIdInput');
     const friendId = input.value.trim();
-    if (!friendId || friendId === myId) {
-        alert('Введи корректный ID!');
+    if (!friendId) return;
+    if (friendId === myId) {
+        alert('Нельзя добавить самого себя!');
         return;
     }
-    if (friends[friendId]) {
-        // уже есть, просто открыть чат
-        openChat(friendId);
-        input.value = '';
-        return;
+    if (!friends[friendId]) {
+        friends[friendId] = { name: friendId, avatarColor: randomColor() };
+        saveFriends();
     }
-    // Сохраняем нового друга (имя пока id, потом можно изменить)
-    friends[friendId] = { name: friendId, avatarColor: randomColor() };
-    saveFriends();
-    renderFriendList();
+    // Открываем чат с этим другом
     openChat(friendId);
     input.value = '';
-}
+    renderFriendList();
+});
 
-// ── Открытие чата с другом ────────────────────
+// ── Открыть чат с другом ──────────────────────
 function openChat(friendId) {
     currentFriend = friendId;
-    document.getElementById('active-friend-name').textContent = friends[friendId].name || friendId;
-    document.getElementById('active-friend-avatar').style.background = friends[friendId].avatarColor || '#5865f2';
-    document.getElementById('active-friend-avatar').textContent = (friends[friendId].name || friendId).substring(0,2).toUpperCase();
-    document.getElementById('chat-header').classList.remove('hidden');
-    document.getElementById('empty-placeholder').classList.add('hidden');
-    document.getElementById('msg-input-area').classList.remove('hidden');
-    document.getElementById('msgInput').focus();
-    // Очистить старые сообщения
-    document.getElementById('chat-messages').innerHTML = '';
-    // Установить активный класс в списке
-    renderFriendList();
-    // Установить соединение, если ещё нет
+
+    // Переключиться на чат-панель (на мобилке скрываем панель друзей)
+    const friendsPanel = document.getElementById('friends-panel');
+    const chatPanel = document.getElementById('chat-panel');
+    if (window.innerWidth < 768) {
+        friendsPanel.style.display = 'none';
+        chatPanel.classList.add('active');
+    } else {
+        // На десктопе обе панели видны, просто обновляем чат
+        chatPanel.classList.add('active');
+    }
+
+    // Заполнить шапку чата
+    const fdata = friends[friendId] || { name: friendId, avatarColor: '#5865f2' };
+    document.getElementById('chat-friend-name').textContent = fdata.name;
+    const avatar = document.getElementById('chat-friend-avatar');
+    avatar.style.background = fdata.avatarColor;
+    avatar.textContent = fdata.name.substring(0,2).toUpperCase();
+
+    // Очистить сообщения
+    document.getElementById('messages').innerHTML = '';
+
+    // Если соединения нет, установить
     if (!connections[friendId]) {
         establishConnection(friendId);
     }
+
+    renderFriendList(); // обновить активный класс
 }
 
-// ── Установка P2P соединения ──────────────────
+// ── Кнопка "Назад" (только для мобильных) ──────
+document.getElementById('back-btn').addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+        document.getElementById('friends-panel').style.display = 'flex';
+        document.getElementById('chat-panel').classList.remove('active');
+    }
+    // Можно оставить currentFriend, но для порядка сбросим чат
+    currentFriend = null;
+    renderFriendList();
+});
+
+// ── Установка WebRTC соединения ────────────────
 function establishConnection(friendId) {
     const conn = myPeer.connect(friendId, { reliable: true });
     setupConnection(conn);
@@ -211,7 +403,8 @@ function establishConnection(friendId) {
 
 function setupConnection(conn) {
     const friendId = conn.peer;
-    // Если соединение уже существует, закрыть старое
+
+    // Если старое соединение есть, закрыть
     if (connections[friendId]) {
         connections[friendId].close();
     }
@@ -219,31 +412,29 @@ function setupConnection(conn) {
 
     conn.on('open', () => {
         console.log('Connected to', friendId);
-        // Добавить друга, если нет в списке
+        // Добавить в друзья, если нет
         if (!friends[friendId]) {
             friends[friendId] = { name: friendId, avatarColor: randomColor() };
             saveFriends();
-            renderFriendList();
         }
-        if (currentFriend === friendId) {
-            // обновить UI
-            renderFriendList();
-        }
+        renderFriendList();
+        // Если сейчас чат с этим другом открыт, ничего дополнительно
     });
 
     conn.on('data', (data) => {
         if (currentFriend === friendId) {
             addMessage(data, false);
         } else {
-            // Можно показать уведомление, но пока пропустим
+            // Можно показать уведомление, пока пропустим
         }
     });
 
     conn.on('close', () => {
         delete connections[friendId];
+        renderFriendList();
         if (currentFriend === friendId) {
-            // показать, что отключился
-            renderFriendList();
+            // Соединение потеряно, можно показать сообщение в чате
+            addMessage('Соединение потеряно.', false);
         }
     });
 
@@ -252,19 +443,22 @@ function setupConnection(conn) {
         delete connections[friendId];
         renderFriendList();
     });
-
-    // Если друг уже был открыт, перерендерим
-    if (currentFriend === friendId) renderFriendList();
 }
 
 // ── Отправка сообщения ─────────────────────────
-function sendMsg() {
-    const input = document.getElementById('msgInput');
+document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
+document.getElementById('messageInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
     const text = input.value.trim();
     if (!text || !currentFriend) return;
+
     const conn = connections[currentFriend];
     if (!conn) {
-        alert('Соединение потеряно. Попробуй переподключиться.');
+        alert('Нет соединения с этим другом.');
         return;
     }
     conn.send(text);
@@ -273,40 +467,43 @@ function sendMsg() {
 }
 
 function addMessage(text, isMine) {
-    const container = document.getElementById('chat-messages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'msg' + (isMine ? ' mine' : '');
-    msgDiv.textContent = text;
-    container.appendChild(msgDiv);
+    const container = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'msg' + (isMine ? ' mine' : '');
+    div.textContent = text;
+    container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
 
-// ── Отключение от текущего чата ───────────────
-function disconnectCurrent() {
-    if (currentFriend && connections[currentFriend]) {
-        connections[currentFriend].close();
-        delete connections[currentFriend];
+// ── Адаптация при изменении размера окна ──────
+window.addEventListener('resize', () => {
+    const friendsPanel = document.getElementById('friends-panel');
+    const chatPanel = document.getElementById('chat-panel');
+    if (window.innerWidth >= 768) {
+        // На десктопе всегда показываем обе панели, если чат активен
+        friendsPanel.style.display = 'flex';
+        if (currentFriend) {
+            chatPanel.classList.add('active');
+        } else {
+            chatPanel.classList.remove('active');
+        }
+    } else {
+        // На мобилке управляем видимостью
+        if (currentFriend) {
+            friendsPanel.style.display = 'none';
+            chatPanel.classList.add('active');
+        } else {
+            friendsPanel.style.display = 'flex';
+            chatPanel.classList.remove('active');
+        }
     }
-    currentFriend = null;
-    document.getElementById('chat-header').classList.add('hidden');
-    document.getElementById('empty-placeholder').classList.remove('hidden');
-    document.getElementById('msg-input-area').classList.add('hidden');
-    document.getElementById('chat-messages').innerHTML = '';
-    renderFriendList();
-}
+});
 
-// ── Вспомогательные ────────────────────────────
-function randomColor() {
-    const colors = ['#5865f2','#57f287','#fee75c','#eb459e','#ed4245','#e67e22','#1abc9c','#3498db'];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+// ── Запуск ────────────────────────────────────
+init();
 
-// ── Старт ──────────────────────────────────────
-initPeer();
-
-// Перед закрытием страницы отключаем все соединения
 window.addEventListener('beforeunload', () => {
-    for (const conn of Object.values(connections)) {
+    for (let conn of Object.values(connections)) {
         conn.close();
     }
 });
